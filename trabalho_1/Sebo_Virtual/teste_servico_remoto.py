@@ -125,7 +125,7 @@ def main():
     livros_1 = cliente_fazer_requisicao("Cliente1", "listar")
     print(f"Resultado:\n")
     for livro in livros_1:
-        print(f"  • {livro.titulo} ({livro.codigo}) - R$ {livro.preco:.2f}")
+        print(f"  - {livro.titulo} ({livro.codigo}) - R$ {livro.preco:.2f}")
     
     time.sleep(0.5)
     
@@ -133,7 +133,7 @@ def main():
     livros_2 = cliente_fazer_requisicao("Cliente2", "buscar 002")
     print(f"Resultado:\n")
     for livro in livros_2:
-        print(f"  • {livro.titulo} ({livro.codigo}) - R$ {livro.preco:.2f}")
+        print(f"  - {livro.titulo} ({livro.codigo}) - R$ {livro.preco:.2f}")
     
     time.sleep(0.5)
     
@@ -141,14 +141,14 @@ def main():
     livros_3 = cliente_fazer_requisicao("Cliente3", "buscar 001")
     print(f"Resultado:\n")
     for livro in livros_3:
-        print(f"  • {livro.titulo} ({livro.codigo}) - R$ {livro.preco:.2f}")
+        print(f"  - {livro.titulo} ({livro.codigo}) - R$ {livro.preco:.2f}")
     
     # Aguardar servidor finalizar
     servidor.join(timeout=2)
     servidor.parar()
     
     print("\n" + "="*80)
-    print("✓ Teste concluído com sucesso!")
+    print(Teste concluído com sucesso!")
     print("="*80)
     print("\nFluxo")
     print("1. Cliente empacota comando (struct.pack + encode)")
@@ -158,8 +158,8 @@ def main():
     print("5. Servidor empacota resposta com LivroOutputStream")
     print("6. Servidor envia resposta via socket TCP")
     print("7. Cliente desempacota resposta com LivroInputStream")
-    print("\n✓ Todos os dados foram empacotados/desempacotados via sockets TCP!")
-    print("✓ Reutilizando lógica de servidor_livros.py na classe ServidorTeste")
+    print("\n Todos os dados foram empacotados/desempacotados via sockets TCP!")
+    print("Reutilizando lógica de servidor_livros.py na classe ServidorTeste")
 
 
 if __name__ == "__main__":
