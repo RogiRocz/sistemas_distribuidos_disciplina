@@ -66,7 +66,7 @@ def conectar_servidor() -> None:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as socket_cliente:
         try:
             socket_cliente.connect((HOST, PORTA))
-            print(f"✓ Conectado ao servidor em {HOST}:{PORTA}", file=sys.stderr)
+            print(f"Conectado ao servidor em {HOST}:{PORTA}", file=sys.stderr)
             
             print("\n" + "="*80)
             print("CLIENTE DE BIBLIOTECA REMOTA")
@@ -84,7 +84,7 @@ def conectar_servidor() -> None:
                         continue
                     
                     if comando.lower() == "sair":
-                        print("✓ Desconectando...", file=sys.stderr)
+                        print("Desconectando...", file=sys.stderr)
                         break
                     
                     # Enviar comando
@@ -98,12 +98,12 @@ def conectar_servidor() -> None:
                     break
         
         except ConnectionRefusedError:
-            print(f"✗ Erro: não foi possível conectar ao servidor em {HOST}:{PORTA}", file=sys.stderr)
-            print("  Inicie o servidor: python3 servidor_livros.py", file=sys.stderr)
+            print(f"Erro: não foi possível conectar ao servidor em {HOST}:{PORTA}", file=sys.stderr)
+            print("Inicie o servidor: python3 servidor_livros.py", file=sys.stderr)
             sys.exit(1)
         
         except Exception as e:
-            print(f"✗ Erro: {e}", file=sys.stderr)
+            print(f"Erro: {e}", file=sys.stderr)
             sys.exit(1)
 
 
