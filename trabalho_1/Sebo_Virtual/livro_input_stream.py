@@ -30,7 +30,7 @@ class LivroInputStream(io.RawIOBase):
     def __init__(self, origem: BinaryIO) -> None:
         super().__init__()
         if origem is None:
-            raise ValueError("origem nao pode ser None")
+            raise ValueError("origem nao pode ser nula")
 
         self._origem = origem
         self._fechado = False
