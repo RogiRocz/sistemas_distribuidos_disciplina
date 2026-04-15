@@ -36,9 +36,9 @@ class LivroOutputStream(io.RawIOBase):
         if quantidade_objetos < 0:
             raise ValueError("quantidade_objetos nao pode ser negativa")
         if quantidade_objetos > len(livros):
-            raise ValueError("quantidade_objetos nao pode ser maior que o tamanho do array")
+            raise ValueError("quantidade_objetos nao pode ser maior que a quantidade de livros")
         if destino is None:
-            raise ValueError("destino nao pode ser None")
+            raise ValueError("destino nao pode ser nulo")
 
         self._livros = list(livros)
         self._quantidade_objetos = quantidade_objetos
