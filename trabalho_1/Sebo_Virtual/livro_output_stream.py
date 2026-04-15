@@ -4,7 +4,13 @@ import io
 import struct
 from typing import BinaryIO, Sequence
 
-from .livro import Livro
+try:
+    from .servidor.modelos.livro import Livro
+except ImportError:
+    try:
+        from servidor.modelos.livro import Livro
+    except ImportError:
+        from Sebo_Virtual.servidor.modelos.livro import Livro
 
 
 class LivroOutputStream(io.RawIOBase):
