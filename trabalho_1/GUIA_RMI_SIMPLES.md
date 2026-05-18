@@ -159,10 +159,10 @@ python teste_rmi_simples.py
 ### Opção 2: Servidor + Cliente Manual
 ```bash
 # Terminal 1 - Servidor
-python -m Sebo_Virtual.servidor_rmi_simples
+python -m Sebo_Virtual.servidor_rmi
 
 # Terminal 2 - Cliente
-python -m Sebo_Virtual.cliente_rmi_simples
+python -m Sebo_Virtual.cliente_rmi
 ```
 
 ## 🎯 Requisitos Atendidos
@@ -224,10 +224,7 @@ def novo_metodo(self, param1: str) -> dict:
     return self._chamar_remoto("novo_metodo", {"param1": param1})
 ```
 
-## ❓ Perguntas Frequentes
 
-**P: Por que usar UDP e não TCP?**
-A: UDP é mais simples (sem conexão), menor overhead. Para aplicações críticas, TCP seria melhor.
 
 **P: Como sabe qual método chamar?**
 A: O `method_id` (string) é procurado no dicionário `self.methods` do dispatcher.
@@ -238,8 +235,3 @@ A: `RemoteInvoker.do_operation()` tira exceção de timeout.
 **P: Como passa objetos complexos?**
 A: Convertendo para dict com `to_dict()` e depois para JSON.
 
----
-
-**Versão**: Simplificada e Comentada
-**Data**: 2024/2025
-**Status**: ✅ Completo e Testado

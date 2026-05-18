@@ -1,9 +1,5 @@
 """
-SISTEMA RMI (Remote Method Invocation) - VERSÃO SIMPLIFICADA E COMENTADA
-=========================================================================
-
-Este arquivo implementa o protocolo de Requisição-Resposta para RMI,
-conforme a seção 5.2 do livro "Distributed Systems: Concepts and Design".
+SISTEMA RMI (Remote Method Invocation) 
 
 FLUXO:
 1. Cliente cria uma REQUISIÇÃO com:
@@ -54,10 +50,7 @@ from typing import Any, Optional, Callable, Dict
 from abc import ABC, abstractmethod
 
 
-# ============================================================================
 # CLASSES DE REFERÊNCIA E MENSAGENS
-# ============================================================================
-
 @dataclass
 class RemoteObjectRef:
     """
@@ -88,8 +81,6 @@ class RemoteObjectRef:
 @dataclass
 class RequestMessage:
     """
-    MENSAGEM DE REQUISIÇÃO
-    
     Representa um pedido do cliente para executar um método remoto.
     
     Fluxo:
@@ -194,7 +185,7 @@ class ReplyMessage:
     - exception: Mensagem de erro (falha)
     """
     message_type: int = 1     # Sempre 1 = Reply
-    request_id: int = 0       # Mesmo ID da requisição (correlação)
+    request_id: int = 0       # Mesmo ID da requisição
     result: bytes = b""       # Resultado em JSON (se sucesso)
     exception: bytes = b""    # Mensagem de erro (se falha)
 
@@ -235,10 +226,7 @@ class ReplyMessage:
         )
 
 
-# ============================================================================
 # UTILITÁRIOS DE SERIALIZAÇÃO
-# ============================================================================
-
 class Serializer:
     """
     UTILITÁRIO DE SERIALIZAÇÃO
@@ -266,15 +254,11 @@ class Serializer:
     
     @staticmethod
     def serialize_list(objects: list) -> bytes:
-        """Serializa uma lista de objetos"""
+        """Serializa uma lista de objetos reutilizando serialize()"""
         data = []
         for obj in objects:
-            if hasattr(obj, 'to_dict'):
-                data.append(obj.to_dict())
-            elif hasattr(obj, '__dict__'):
-                data.append(obj.__dict__)
-            else:
-                data.append(obj)
+            serialized = Serializer.serialize(obj)
+            data.append(json.loads(serialized.decode('utf-8')))
         return json.dumps(data, default=str).encode('utf-8')
     
     @staticmethod
@@ -297,11 +281,7 @@ class Serializer:
             except TypeError:
                 return parsed
 
-
-# ============================================================================
 # LADO DO CLIENTE: INVOCADOR REMOTO
-# ============================================================================
-
 class RemoteInvoker:
     """
     INVOCADOR REMOTO (LADO CLIENTE)
@@ -350,10 +330,10 @@ class RemoteInvoker:
         Raises:
             Exception: Se houve erro remoto ou timeout
         """
-        # Gerar ID único para esta requisição
+        # ID
         self.request_counter += 1
         
-        # PASSO 1: Criar a requisição
+        # Criar a requisição
         request = RequestMessage(
             message_type=0,                    # 0 = Request
             request_id=self.request_counter,   # ID único
@@ -363,28 +343,28 @@ class RemoteInvoker:
         )
         
         try:
-            # PASSO 2: Abrir socket UDP
+            # Abrir socket UDP
             sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             sock.settimeout(self.timeout)
             
-            # PASSO 3: Converter requisição em bytes
+            # Converter requisição em bytes
             request_bytes = request.to_bytes()
             
-            # PASSO 4: Enviar para o servidor
+            # Enviar para o servidor
             sock.sendto(request_bytes, (object_ref.host, object_ref.port))
             
-            # PASSO 5: Aguardar resposta
+            # Aguardar resposta
             response_bytes, _ = sock.recvfrom(65536)
             sock.close()
             
-            # PASSO 6: Desempacotar resposta
+            # Desempacotar resposta
             reply = ReplyMessage.from_bytes(response_bytes)
             
-            # PASSO 7: Verificar se houve erro
+            # Verificar se houve erro
             if reply.exception:
                 raise Exception(f"Erro no servidor: {reply.exception.decode('utf-8')}")
             
-            # PASSO 8: Retornar resultado
+            # Retornar resultado
             return reply.result
             
         except socket.timeout:
@@ -393,13 +373,9 @@ class RemoteInvoker:
             raise Exception(f"Erro na requisição remota: {str(e)}")
 
 
-# ============================================================================
 # LADO DO SERVIDOR: DISPATCHER E SERVIDOR RMI
-# ============================================================================
-
 class RemoteDispatcher(ABC):
     """
-    BASE PARA DESPACHANTES (LADO SERVIDOR)
     
     Um despachante é um objeto que implementa os métodos remotos.
     Subclasses devem implementar dispatch_method para processar requisições.
@@ -427,7 +403,7 @@ class RemoteDispatcher(ABC):
 
 class RemoteServer:
     """
-    SERVIDOR RMI (LADO SERVIDOR)
+    SERVIDOR RMI
     
     Escuta por requisições UDP e processa-as.
     
@@ -500,17 +476,17 @@ class RemoteServer:
         PROCESSA UMA ÚNICA REQUISIÇÃO
         """
         try:
-            # PASSO 1: Receber dados UDP
+            # Receber dados UDP
             data, client_address = self.socket.recvfrom(65536)
             
-            # PASSO 2: Desempacotar requisição
+            # Desempacotar requisição
             request = RequestMessage.from_bytes(data)
             
             print(f"\n[*] Requisição recebida:")
             print(f"    Objeto: {request.object_reference.object_name}")
             print(f"    Método: {request.method_id}")
             
-            # PASSO 3: Localizar despachante para o objeto
+            # Localizar despachante para o objeto
             dispatcher = self.dispatchers.get(request.object_reference.object_name)
             
             if dispatcher is None:
@@ -524,13 +500,13 @@ class RemoteServer:
                 print(f"    [!] {error_msg}")
             else:
                 try:
-                    # PASSO 4: Executar o método
+                    # Executar o método
                     method_result = dispatcher.dispatch_method(
                         request.method_id,
                         request.arguments
                     )
                     
-                    # PASSO 5: Empacotar resultado em resposta
+                    # Empacotar resultado em resposta
                     reply = ReplyMessage(
                         message_type=1,
                         request_id=request.request_id,
@@ -548,7 +524,7 @@ class RemoteServer:
                     )
                     print(f"    [!] Erro: {error_msg}")
             
-            # PASSO 6: Enviar resposta de volta ao cliente
+            # Enviar resposta de volta ao cliente
             self.socket.sendto(reply.to_bytes(), client_address)
             
         except Exception as e:

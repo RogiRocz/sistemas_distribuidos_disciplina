@@ -61,10 +61,10 @@ Executa os 8 testes e mostra o fluxo completo de cada requisição RMI.
 **Opção 2 - Servidor + Cliente Manual:**
 ```bash
 # Terminal 1 - Servidor
-python -m Sebo_Virtual.servidor_rmi_simples
+python -m Sebo_Virtual.servidor_rmi
 
 # Terminal 2 - Cliente (menu interativo)
-python -m Sebo_Virtual.cliente_rmi_simples
+python -m Sebo_Virtual.cliente_rmi
 ```
 
 ## 📡 Métodos Remotos
@@ -97,7 +97,7 @@ python -m Sebo_Virtual.cliente_rmi_simples
 1. Leia [GUIA_RMI_SIMPLES.md](GUIA_RMI_SIMPLES.md) - Explica visualmente o conceito
 2. Execute `python teste_rmi_simples.py` - Veja funcionando
 3. Leia [rmi_comentado.py](Sebo_Virtual/rmi_comentado.py) - Entenda o protocolo
-4. Leia [servidor_rmi_simples.py](Sebo_Virtual/servidor_rmi_simples.py) - Veja implementação
-5. Leia [cliente_rmi_simples.py](Sebo_Virtual/cliente_rmi_simples.py) - Entenda invocação
+4. Leia [servidor_rmi.py](Sebo_Virtual/servidor_rmi.py) - Veja implementação
+5. Leia [cliente_rmi.py](Sebo_Virtual/cliente_rmi.py) - Entenda invocação
 
 **Tempo estimado**: ~1 hora para entender completamente

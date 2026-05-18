@@ -24,18 +24,14 @@ import time
 from pathlib import Path
 
 try:
-    from Sebo_Virtual.servidor_rmi_simples import criar_catalogo_inicial, LojaDispatcher
-    from Sebo_Virtual.cliente_rmi_simples import ClienteLoja
+    from Sebo_Virtual.servidor_rmi import criar_catalogo_inicial, LojaDispatcher
+    from Sebo_Virtual.cliente_rmi import ClienteLoja
     from Sebo_Virtual.rmi_comentado import RemoteServer, RemoteObjectRef, RemoteInvoker
 except ImportError:
     from servidor_rmi_simples import criar_catalogo_inicial, LojaDispatcher
     from cliente_rmi_simples import ClienteLoja
     from rmi_comentado import RemoteServer, RemoteObjectRef, RemoteInvoker
 
-
-# ============================================================================
-# FUNÇÃO PARA EXECUTAR SERVIDOR EM THREAD
-# ============================================================================
 
 def executar_servidor_em_thread():
     """
@@ -58,9 +54,7 @@ def executar_servidor_em_thread():
         print(f"[!] Erro no servidor: {e}")
 
 
-# ============================================================================
 # TESTES
-# ============================================================================
 
 def teste_fluxo_completo():
     """
