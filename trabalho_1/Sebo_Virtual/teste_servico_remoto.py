@@ -148,7 +148,7 @@ def main():
     servidor.parar()
     
     print("\n" + "="*80)
-    print(Teste concluído com sucesso!")
+    print("Teste concluído com sucesso!")
     print("="*80)
     print("\nFluxo")
     print("1. Cliente empacota comando (struct.pack + encode)")

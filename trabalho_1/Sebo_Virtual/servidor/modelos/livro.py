@@ -15,3 +15,12 @@ class Livro(Produto):
         super().__post_init__()
         if not self.autor.strip():
             raise ValueError("autor nao pode ser vazio")
+    
+    def to_dict(self) -> dict[str, object]:
+        data = super().to_dict()
+        data.update({
+            "autor": self.autor,
+            "editora": self.editora,
+            "ano_publicacao": self.ano_publicacao
+        })
+        return data

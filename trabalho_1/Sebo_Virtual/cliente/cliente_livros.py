@@ -13,6 +13,7 @@ Uso:
 import socket
 import struct
 import sys
+from pathlib import Path
 
 try:
     from ..livro_input_stream import LivroInputStream
@@ -20,7 +21,18 @@ except ImportError:
     try:
         from livro_input_stream import LivroInputStream
     except ImportError:
-        from Sebo_Virtual.livro_input_stream import LivroInputStream
+        raiz_pacote = Path(__file__).resolve().parents[1]
+        raiz_projeto = raiz_pacote.parent
+
+        if str(raiz_pacote) not in sys.path:
+            sys.path.insert(0, str(raiz_pacote))
+        if str(raiz_projeto) not in sys.path:
+            sys.path.insert(0, str(raiz_projeto))
+
+        try:
+            from Sebo_Virtual.livro_input_stream import LivroInputStream
+        except ImportError:
+            from livro_input_stream import LivroInputStream
 
 
 HOST = "127.0.0.1"
@@ -37,6 +49,18 @@ def enviar_comando(socket_cliente: socket.socket, comando: str) -> None:
     arquivo.write(comando_bytes)
     arquivo.flush()
     
+    print(f"[cliente] Comando enviado: '{comando}'", file=sys.stderr)
+
+
+def enviar_comando_stream(arquivo, comando: str) -> None:
+    """Envia um comando usando um stream ja aberto para a conexao."""
+    comando_bytes = comando.encode("utf-8")
+    tamanho = struct.pack("!I", len(comando_bytes))
+
+    arquivo.write(tamanho)
+    arquivo.write(comando_bytes)
+    arquivo.flush()
+
     print(f"[cliente] Comando enviado: '{comando}'", file=sys.stderr)
 
 
@@ -60,12 +84,31 @@ def receber_resposta(socket_cliente: socket.socket) -> None:
             print(f"   Preço: R$ {livro.preco:.2f}\n")
 
 
+def receber_resposta_stream(arquivo) -> None:
+    """Recebe e desserializa a resposta usando stream ja aberto."""
+    stream_resposta = LivroInputStream(arquivo)
+    livros = stream_resposta.ler_livros()
+
+    print(f"[cliente] Resposta recebida: {len(livros)} livro(s)", file=sys.stderr)
+    print("-" * 80)
+
+    if not livros:
+        print("Nenhum livro encontrado")
+    else:
+        for i, livro in enumerate(livros, 1):
+            print(f"{i}. {livro.titulo}")
+            print(f"   Código: {livro.codigo}")
+            print(f"   Autor: {livro.autor}")
+            print(f"   Preço: R$ {livro.preco:.2f}\n")
+
+
 def conectar_servidor() -> None:
     """Conecta ao servidor e interage com o usuário."""
     
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as socket_cliente:
         try:
             socket_cliente.connect((HOST, PORTA))
+            arquivo = socket_cliente.makefile('rwb')
             print(f"Conectado ao servidor em {HOST}:{PORTA}", file=sys.stderr)
             
             print("\n" + "="*80)
@@ -88,14 +131,16 @@ def conectar_servidor() -> None:
                         break
                     
                     # Enviar comando
-                    enviar_comando(socket_cliente, comando)
+                    enviar_comando_stream(arquivo, comando)
                     
                     # Receber resposta
-                    receber_resposta(socket_cliente)
+                    receber_resposta_stream(arquivo)
                     
                 except EOFError:
                     # Ctrl+D
                     break
+                
+            arquivo.close()
         
         except ConnectionRefusedError:
             print(f"Erro: não foi possível conectar ao servidor em {HOST}:{PORTA}", file=sys.stderr)

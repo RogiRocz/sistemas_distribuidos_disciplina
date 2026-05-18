@@ -14,3 +14,11 @@ class Ebook(Produto):
         super().__post_init__()
         if not self.formato.strip():
             raise ValueError("formato nao pode ser vazio")
+    
+    def to_dict(self) -> dict[str, object]:
+        data = super().to_dict()
+        data.update({
+            "formato": self.formato,
+            "tamanho_mb": self.tamanho_mb
+        })
+        return data

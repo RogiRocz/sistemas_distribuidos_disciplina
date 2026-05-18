@@ -47,6 +47,7 @@ class LivroInputStream(io.RawIOBase):
     def close(self) -> None:
         self._fechado = True
         super().close()
+         
 
     def ler_livros(self) -> list[Livro]:
         """Lê os livros do stream e retorna uma lista de objetos Livro."""

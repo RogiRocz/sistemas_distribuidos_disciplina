@@ -14,3 +14,11 @@ class CD(Produto):
         super().__post_init__()
         if not self.artista.strip():
             raise ValueError("artista nao pode ser vazio")
+    
+    def to_dict(self) -> dict[str, object]:
+        data = super().to_dict()
+        data.update({
+            "artista": self.artista,
+            "genero": self.genero
+        })
+        return data
