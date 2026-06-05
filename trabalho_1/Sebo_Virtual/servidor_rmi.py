@@ -15,9 +15,6 @@ ESTRUTURA:
 import sys
 from pathlib import Path
 
-# ============================================================================
-# IMPORTS - Trazer classes necessárias
-# ============================================================================
 
 try:
     # Tentar import relativo (quando executado como módulo)
