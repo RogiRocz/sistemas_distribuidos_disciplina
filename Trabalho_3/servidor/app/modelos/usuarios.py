@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 @dataclass
 class GerenciadorUsuarios:
     def __init__(self):

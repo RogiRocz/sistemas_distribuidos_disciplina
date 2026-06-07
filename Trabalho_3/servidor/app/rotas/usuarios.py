@@ -1,11 +1,11 @@
 from fastapi import APIRouter, HTTPException
 from app.dependencies import usuarios_instance
-from app.schemas.produto_schema import LoginSchema
+from app.esquemas.sebo import Login
 
 router = APIRouter(prefix="/usuarios", tags=["Objeto 3: Gerenciador de Usuários"])
 
 @router.post("/login")
-def login(schema: LoginSchema):
+def login(schema: Login):
     if not usuarios_instance.autenticar(schema.username, schema.senha):
         raise HTTPException(status_code=401, detail="Falha na autenticação. Credenciais inválidas.")
     return {"status": "Autenticado", "usuario": schema.username}

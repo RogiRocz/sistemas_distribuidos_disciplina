@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from app.dependencies import loja_instance
-from app.schemas.produto_schema import LivroCreateSchema, CDCreateSchema, EbookCreateSchema, ApostilaCreateSchema, AtualizarPrecoSchema
+from app.esquemas.sebo import LivroCreate, CDCreate, EbookCreate, ApostilaCreate, AtualizarPreco
 from app.modelos.livro import Livro
 from app.modelos.cd import CD
 from app.modelos.ebook import Ebook
@@ -32,31 +32,31 @@ def buscar_por_titulo(titulo: str):
     return [p.to_dict() for p in loja_instance.buscar_por_titulo(titulo)]
 
 @router.post("/produtos/livro")
-def adicionar_livro(schema: LivroCreateSchema):
+def adicionar_livro(schema: LivroCreate):
     livro = Livro(**schema.model_dump())
     loja_instance.adicionar_produto(livro)
     return {"status": "sucesso", "produto": livro.to_dict()}
 
 @router.post("/produtos/cd")
-def adicionar_cd(schema: CDCreateSchema):
+def adicionar_cd(schema: CDCreate):
     cd = CD(**schema.model_dump())
     loja_instance.adicionar_produto(cd)
     return {"status": "sucesso", "produto": cd.to_dict()}
 
 @router.post("/produtos/ebook")
-def adicionar_ebook(schema: EbookCreateSchema):
+def adicionar_ebook(schema: EbookCreate):
     ebook = Ebook(**schema.model_dump())
     loja_instance.adicionar_produto(ebook)
     return {"status": "sucesso", "produto": ebook.to_dict()}
 
 @router.post("/produtos/apostila")
-def adicionar_apostila(schema: ApostilaCreateSchema):
+def adicionar_apostila(schema: ApostilaCreate):
     apostila = Apostila(**schema.model_dump())
     loja_instance.adicionar_produto(apostila)
     return {"status": "sucesso", "produto": apostila.to_dict()}
 
 @router.patch("/produtos/{codigo}/preco")
-def atualizar_preco(codigo: str, schema: AtualizarPrecoSchema):
+def atualizar_preco(codigo: str, schema: AtualizarPreco):
     produto = loja_instance.buscar_por_codigo(codigo)
     if not produto:
         raise HTTPException(status_code=404, detail=f"Produto {codigo} não encontrado")

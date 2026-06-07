@@ -3,7 +3,7 @@ from app.dependencies import carrinho_instance, loja_instance
 
 router = APIRouter(prefix="/carrinho", tags=["Objeto 2: Carrinho de Compras"])
 
-@router.get("")
+@router.get("/")
 def ver_carrinho():
     itens = carrinho_instance.listar_itens()
     detalhes = []
@@ -13,11 +13,8 @@ def ver_carrinho():
     for codigo, qtd in itens.items():
         prod = loja_instance.buscar_por_codigo(codigo)
         if prod:
-            d = prod.to_dict()
-            d["quantidade"] = qtd
-            d["subtotal"] = prod.preco * qtd
-            total += d["subtotal"]
-            detalhes.append(d)
+            total += prod.preco * qtd
+            detalhes.append({**prod.to_dict(), "quantidade": qtd})
             
     return {"itens": detalhes, "valor_total": total}
 
