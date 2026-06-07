@@ -1,5 +1,7 @@
 import com.google.gson.*;
 import java.util.*;
+// Na pasta  C:\Users\Cauã\Documents\GitHub\sistemas_distribuidos_disciplina\Trabalho_3\cliente_java>
+// rode com & "C:\Program Files\Java\jdk-26.0.1\bin\java.exe" -cp "bin;lib\*" Main
 
 public class Main {
     private static ApiClient api;
