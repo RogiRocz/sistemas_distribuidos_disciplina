@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sebo Virtual - Dashboard Profissional</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .dist-obj-card { border-top: 4px solid #0d6efd; transition: transform 0.2s; }
+        .dist-obj-card:hover { transform: translateY(-5px); }
+        .view-panel { background: white; border-radius: 8px; min-height: 200px; padding: 15px; border: 1px solid #dee2e6; }
+        #console-log { 
+            background: #2b2d42; color: #8d99ae; font-size: 0.85rem;
+            height: 250px; overflow-y: auto; border-radius: 8px; padding: 10px;
+        }
+        .status-badge { font-size: 0.75rem; }
+        .login-error { display: none; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-dark bg-primary mb-4 shadow">
+    <div class="container">
+        <span class="navbar-brand mb-0 h1"><i class="bi bi-cpu-fill"></i> Sebo Virtual - Sistemas Distribuídos</span>
+        <div id="loja-nome-header" class="text-white fw-bold">Carregando Loja...</div>
+    </div>
+</nav>
+
+<div class="container">
+    <!-- BARRA SUPERIOR DE LOGIN (OBJETO 3) -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body bg-light">
+            <div class="row align-items-center">
+                <div class="col-md-3">
+                    <h5 class="mb-0"><i class="bi bi-person-lock"></i> Autenticação</h5>
+                </div>
+                <div class="col-md-7">
+                    <div class="input-group">
+                        <span class="input-group-text">@</span>
+                        <input type="text" id="user" class="form-control" placeholder="Usuário">
+                        <input type="password" id="pass" class="form-control" placeholder="Senha">
+                        <button class="btn btn-dark" onclick="login()">Entrar</button>
+                    </div>
+                    <div id="login-feedback" class="alert alert-danger login-error p-2 small" role="alert">
+                        <i class="bi bi-exclamation-triangle"></i> Usuário ou senha incorretos!
+                    </div>
+                </div>
+                <div class="col-md-2 text-end">
+                    <span id="user-status" class="badge bg-secondary">Offline</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- COLUNA DE COMANDOS -->
+        <div class="col-lg-4">
+            <!-- OBJETO 1: CATALOGO -->
+            <div class="card dist-obj-card shadow-sm mb-4">
+                <div class="card-header bg-white fw-bold"><i class="bi bi-book"></i> Catálogo de Produtos</div>
+                <div class="card-body">
+                    <button class="btn btn-outline-primary btn-sm w-100 mb-2" onclick="listarProdutos()">Listar Catálogo Completo</button>
+                    <div class="input-group mb-2">
+                        <input type="text" id="busca-titulo" class="form-control form-control-sm" placeholder="Buscar título...">
+                        <button class="btn btn-primary btn-sm" onclick="buscarTitulo()"><i class="bi bi-search"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OBJETO 2: CARRINHO -->
+            <div class="card dist-obj-card shadow-sm mb-4" style="border-top-color: #ffc107;">
+                <div class="card-header bg-white fw-bold"><i class="bi bi-cart3"></i> Carrinho de Compras</div>
+                <div class="card-body">
+                    <div class="row g-2 mb-3">
+                        <div class="col-7"><input type="text" id="add-cod" class="form-control form-control-sm" placeholder="Cód. Produto"></div>
+                        <div class="col-5"><button class="btn btn-warning btn-sm w-100" onclick="addCarrinho()">Adicionar</button></div>
+                    </div>
+                    <div class="btn-group w-100">
+                        <button class="btn btn-outline-success btn-sm" onclick="verCarrinho()">Ver Itens</button>
+                        <button class="btn btn-outline-danger btn-sm" onclick="api('POST', '/carrinho/limpar').then(verCarrinho)">Limpar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONSOLE LOG -->
+            <h6 class="text-muted"><i class="bi bi-terminal"></i> Log de Requisições</h6>
+            <div id="console-log"></div>
+        </div>
+
+        <!-- COLUNA DE VISUALIZAÇÃO -->
+        <div class="col-lg-8">
+            <h5 class="mb-3 text-primary"><i class="bi bi-display"></i> Visualização de Dados do Objeto</h5>
+            <div id="main-view" class="view-panel shadow-sm border-0">
+                <div class="text-center text-muted mt-5">
+                    <i class="bi bi-arrow-left-circle" style="font-size: 3rem;"></i>
+                    <p>Selecione uma operação para visualizar os dados retornados pelo servidor.</p>
+                </div>
+            </div>
+            
+            <div class="mt-3 p-3 bg-white rounded shadow-sm border">
+                <h6>Usuários Ativos no Servidor:</h6>
+                <div id="ativos-lista">
+                    <span class="text-muted small">Ninguém logado no momento.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_URL = "http://127.0.0.1:8000";
+
+    // 1. CARREGAMENTO INICIAL
+    window.onload = async () => {
+        const info = await api('GET', '/loja/nome');
+        if(info) document.getElementById('loja-nome-header').innerText = info.nome;
+        atualizarAtivos();
+    };
+
+    // 2. FUNÇÕES DE AUTENTICAÇÃO (OBJETO 3)
+    async function login() {
+        const u = document.getElementById('user').value;
+        const p = document.getElementById('pass').value;
+        const feedback = document.getElementById('login-feedback');
+        
+        feedback.style.display = 'none';
+
+        const res = await api('POST', '/usuarios/login', { username: u, senha: p });
+        
+        if (res && res.status === "Autenticado") {
+            document.getElementById('user-status').innerText = `Logado: ${u}`;
+            document.getElementById('user-status').className = "badge bg-success";
+            atualizarAtivos();
+        } else {
+            feedback.style.display = 'block';
+            document.getElementById('user-status').innerText = "Offline";
+            document.getElementById('user-status').className = "badge bg-danger";
+        }
+    }
+
+    // 3. FUNÇÕES DE CATALOGO (OBJETO 1)
+    async function listarProdutos() {
+        const dados = await api('GET', '/loja/produtos');
+        renderTabela("Produtos no Catálogo", dados);
+    }
+
+    async function buscarTitulo() {
+        const t = document.getElementById('busca-titulo').value;
+        const dados = await api('GET', `/loja/produtos/buscar/${t}`);
+        renderTabela(`Resultados para: ${t}`, dados);
+    }
+
+    // 4. FUNÇÕES DE CARRINHO (OBJETO 2)
+    async function addCarrinho() {
+        const cod = document.getElementById('add-cod').value;
+        await api('POST', `/carrinho/adicionar/${cod}?quantidade=1`);
+        verCarrinho();
+    }
+
+    async function verCarrinho() {
+        const dados = await api('GET', '/carrinho');
+        if (dados) {
+            renderCarrinho(dados);
+        }
+    }
+
+    // 5. RENDERIZADORES VISUAIS
+    function renderTabela(titulo, lista) {
+        let html = `<h6>${titulo}</h6><table class="table table-hover table-sm mt-3">
+                    <thead class="table-light"><tr><th>Cód</th><th>Título</th><th>Tipo</th><th>Preço</th></tr></thead><tbody>`;
+        
+        lista.forEach(p => {
+            html += `<tr><td>${p.codigo}</td><td>${p.titulo}</td><td><span class="badge bg-info text-dark">${p.tipo}</span></td><td>R$ ${p.preco.toFixed(2)}</td></tr>`;
+        });
+        
+        html += "</tbody></table>";
+        document.getElementById('main-view').innerHTML = lista.length ? html : "<p class='text-danger'>Nenhum dado encontrado.</p>";
+    }
+
+    function renderCarrinho(carrinho) {
+        let html = `<h6>Itens no Carrinho</h6><table class="table table-sm mt-3">
+                    <thead><tr><th>Produto</th><th>Qtd</th><th>Preço Un.</th><th>Subtotal</th></tr></thead><tbody>`;
+        
+        carrinho.itens.forEach(i => {
+            html += `<tr><td>${i.titulo}</td><td>${i.quantidade}</td><td>R$ ${i.preco}</td><td>R$ ${i.subtotal}</td></tr>`;
+        });
+        
+        html += `</tbody><tfoot><tr class="table-warning"><td colspan="3"><b>TOTAL</b></td><td><b>R$ ${carrinho.valor_total.toFixed(2)}</b></td></tr></tfoot></table>`;
+        document.getElementById('main-view').innerHTML = html;
+    }
+
+    async function atualizarAtivos() {
+        const dados = await api('GET', '/usuarios/ativos');
+        if(dados) {
+            const lista = dados.usuarios_conectados;
+            document.getElementById('ativos-lista').innerHTML = lista.map(u => `<span class="badge rounded-pill bg-primary me-1"><i class="bi bi-person"></i> ${u}</span>`).join('') || "Nenhum.";
+        }
+    }
+
+    // 6. CORE API & LOG
+    async function api(metodo, endpoint, body = null) {
+        const timestamp = new Date().toLocaleTimeString();
+        try {
+            const res = await fetch(`${API_URL}${endpoint}`, {
+                method: metodo,
+                headers: { 'Content-Type': 'application/json' },
+                body: body ? JSON.stringify(body) : null
+            });
+            
+            const json = await res.json();
+            
+            const logColor = res.ok ? "#0dfd05" : "#ff4d4d";
+            document.getElementById('console-log').innerHTML += `<div><span style="color: #555">[${timestamp}]</span> <span style="color: ${logColor}">${metodo} ${endpoint} -> ${res.status}</span></div>`;
+            document.getElementById('console-log').scrollTop = document.getElementById('console-log').scrollHeight;
+
+            return res.ok ? json : null;
+        } catch (e) {
+            document.getElementById('console-log').innerHTML += `<div class="text-danger">[${timestamp}] Erro de Conexão!</div>`;
+            return null;
+        }
+    }
+</script>
+
+</body>
+</html>
