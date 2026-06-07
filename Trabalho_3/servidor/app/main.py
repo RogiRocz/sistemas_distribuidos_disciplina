@@ -1,5 +1,6 @@
 from fastapi import FastAPI
-from app.rotas import loja_rotas, carrinho_rotas, usuarios_rotas
+from fastapi.middleware.cors import CORSMiddleware
+from app.rotas import loja, carrinho, usuarios
 
 app = FastAPI(
     title="Sebo Virtual API - Trabalho 3 SD",
@@ -7,10 +8,16 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Acoplamento das rotas que manipulam os 3 objetos distribuídos distintos
-app.include_router(loja_rotas.router)
-app.include_router(carrinho_rotas.router)
-app.include_router(usuarios_rotas.router)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # Permite qualquer origem (para teste local)
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(loja.router)
+app.include_router(carrinho.router)
+app.include_router(usuarios.router)
 
 @app.get("/")
 def raiz():
