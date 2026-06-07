@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query, status
 from app.dependencies import loja_instance
 from app.esquemas.sebo import LivroCreate, CDCreate, EbookCreate, ApostilaCreate, AtualizarPreco
 from app.modelos.livro import Livro
@@ -31,25 +31,30 @@ def buscar_por_codigo(codigo: str):
 def buscar_por_titulo(titulo: str):
     return [p.to_dict() for p in loja_instance.buscar_por_titulo(titulo)]
 
-@router.post("/produtos/livro")
+
+@router.get("/produtos/buscar")
+def buscar_por_titulo_query(titulo: str = Query(..., min_length=1)):
+    return [p.to_dict() for p in loja_instance.buscar_por_titulo(titulo)]
+
+@router.post("/produtos/livro", status_code=status.HTTP_201_CREATED)
 def adicionar_livro(schema: LivroCreate):
     livro = Livro(**schema.model_dump())
     loja_instance.adicionar_produto(livro)
     return {"status": "sucesso", "produto": livro.to_dict()}
 
-@router.post("/produtos/cd")
+@router.post("/produtos/cd", status_code=status.HTTP_201_CREATED)
 def adicionar_cd(schema: CDCreate):
     cd = CD(**schema.model_dump())
     loja_instance.adicionar_produto(cd)
     return {"status": "sucesso", "produto": cd.to_dict()}
 
-@router.post("/produtos/ebook")
+@router.post("/produtos/ebook", status_code=status.HTTP_201_CREATED)
 def adicionar_ebook(schema: EbookCreate):
     ebook = Ebook(**schema.model_dump())
     loja_instance.adicionar_produto(ebook)
     return {"status": "sucesso", "produto": ebook.to_dict()}
 
-@router.post("/produtos/apostila")
+@router.post("/produtos/apostila", status_code=status.HTTP_201_CREATED)
 def adicionar_apostila(schema: ApostilaCreate):
     apostila = Apostila(**schema.model_dump())
     loja_instance.adicionar_produto(apostila)
@@ -69,3 +74,18 @@ def remover_produto(codigo: str):
     if not produto:
         raise HTTPException(status_code=404, detail=f"Produto {codigo} não encontrado")
     return {"status": "Removido", "produto": produto.to_dict()}
+
+
+@router.get("/estatisticas")
+def estatisticas_catalogo():
+    produtos = loja_instance.listar_produtos()
+    por_tipo = {}
+
+    for produto in produtos:
+        por_tipo[produto.tipo] = por_tipo.get(produto.tipo, 0) + 1
+
+    return {
+        "total_produtos": len(produtos),
+        "por_tipo": por_tipo,
+        "nomes_disponiveis": [produto.titulo for produto in produtos]
+    }

@@ -19,9 +19,36 @@ app.include_router(loja.router)
 app.include_router(carrinho.router)
 app.include_router(usuarios.router)
 
+
+@app.get("/health")
+def health_check():
+    return {
+        "status": "ok",
+        "service": "Sebo Virtual API",
+        "version": "1.0.0"
+    }
+
+
+@app.get("/api/info")
+def api_info():
+    return {
+        "titulo": app.title,
+        "versao": app.version,
+        "docs": "/docs",
+        "endpoints_principais": [
+            "/loja",
+            "/carrinho",
+            "/usuarios",
+            "/health"
+        ]
+    }
+
+
 @app.get("/")
 def raiz():
     return {
         "mensagem": "Servidor do Sebo Virtual Ativo!",
-        "documentacao_interativa": "/docs"
+        "documentacao_interativa": "/docs",
+        "healthcheck": "/health",
+        "api_info": "/api/info"
     }

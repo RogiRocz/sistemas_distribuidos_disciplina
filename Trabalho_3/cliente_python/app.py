@@ -9,6 +9,10 @@ def format_json(data):
 def testar_sistema():
     print("=== CLIENTE SEBO VIRTUAL (TRABALHO 3) ===")
 
+    print("\n0. Verificando status da API...")
+    health = requests.get(f"{BASE_URL}/health")
+    print(format_json(health.json()))
+
     # --- OBJETO 1: LOJA (Catálogo) ---
     print("\n1. Consultando nome da loja...")
     res = requests.get(f"{BASE_URL}/loja/nome")
@@ -41,10 +45,18 @@ def testar_sistema():
         print(f"- {item['quantidade']}x {item['titulo']} (Subtotal: R$ {item['subtotal']})")
     print(f"VALOR TOTAL: R$ {carrinho['valor_total']}")
 
+    print("\n5.1. Consultando resumo do carrinho...")
+    resumo = requests.get(f"{BASE_URL}/carrinho/resumo").json()
+    print(format_json(resumo))
+
     # --- OPERAÇÃO DE BUSCA ---
     print("\n6. Buscando produto por título 'Pattern'...")
     res_busca = requests.get(f"{BASE_URL}/loja/produtos/buscar/Pattern")
     print(format_json(res_busca.json()))
+
+    print("\n7. Consultando estatísticas do catálogo...")
+    stats = requests.get(f"{BASE_URL}/loja/estatisticas")
+    print(format_json(stats.json()))
 
 if __name__ == "__main__":
     try:
