@@ -1,31 +1,34 @@
 import os
 import sys
 
-# 1. CONFIGURAÇÃO DE CAMINHOS (Deve vir antes de qualquer import do projeto)
-BASE_DIR = os.path.dirname(os.path.abspath(__file__)) # Raiz do Trabalho_4
-RAIZ_PROJETO = os.path.abspath(os.path.join(BASE_DIR, ".."))
-TRABALHO3_DIR = os.path.join(RAIZ_PROJETO, "Trabalho_3", "servidor")
+# 1. CONFIGURAÇÃO DE CAMINHOS REAIS (Baseado em Trabalho_4 dentro de Trabalho_3)
+# BASE_DIR será: .../Trabalho_3/servidor
+BASE_DIR = os.path.dirname(os.path.abspath(__file__)) 
 
+# TRABALHO4_DIR aponta para: .../Trabalho_3/Trabalho_4
+TRABALHO4_DIR = os.path.abspath(os.path.join(BASE_DIR, "../Trabalho_4"))
+
+# injeta a pasta atual (servidor) e a do Trabalho_4 no path do interpretador
 if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
-if TRABALHO3_DIR not in sys.path:
-    sys.path.insert(0, TRABALHO3_DIR)
+if TRABALHO4_DIR not in sys.path:
+    sys.path.insert(0, TRABALHO4_DIR)
 
 # 2. IMPORTS DO FRAMEWORK
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 # 3. IMPORTS DO PROJETO (Trabalho 3 e Trabalho 4)
-from rotas import usuarios, carrinho, loja 
-from evento_broker import publicar_usuario_logado, publicar_carrinho_finalizado
+from rotas import usuarios, carrinho, loja
 
-# Importa o router de eventos do Trabalho_4 com tratamento de erro adequado
+# O import direto agora funciona porque TRABALHO4_DIR está no sys.path
 try:
+    from evento_broker import publicar_usuario_logado, publicar_carrinho_finalizado
     import eventos
     eventos_router = eventos.router
     pubsub_disponivel = True
 except ImportError as e:
-    print(f"Aviso: Módulo de eventos não disponível: {e}")
+    print(f"⚠️ Aviso: Módulo de eventos/broker não disponível: {e}")
     pubsub_disponivel = False
 
 # 4. INICIALIZAÇÃO DA API
@@ -98,3 +101,16 @@ def raiz():
         "api_info": "/api/info",
         "pubsub_status": status_pubsub
     }
+
+if __name__ == "__main__":
+    import uvicorn
+    
+    host = os.getenv("SERVER_HOST", "0.0.0.0")
+    port = int(os.getenv("SERVER_PORT", 8000))
+    
+    uvicorn.run(
+        "main:app",
+        host=host,
+        port=port,
+        reload=True
+    )

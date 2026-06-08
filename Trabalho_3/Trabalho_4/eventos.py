@@ -7,7 +7,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 import json
 import logging
 from typing import Set
-from Trabalho_3.Trabalho_4.evento_broker import broker, TOPICOS
+from evento_broker import broker, TOPICOS
 
 logger = logging.getLogger(__name__)
 

@@ -1,27 +1,21 @@
 import os
 import sys
 
-# Garante a raiz do projeto e o servidor do Trabalho 3 no PATH
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-RAIZ_PROJETO = os.path.abspath(os.path.join(BASE_DIR, ".."))
-TRABALHO3_DIR = os.path.join(RAIZ_PROJETO, "Trabalho_3", "servidor")
-TRABALHO4_DIR = os.path.join(RAIZ_PROJETO, "Trabalho_4")
+# Injeta o caminho correto de Trabalho_4 (que está dentro de Trabalho_3)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__)) # caminho de Trabalho_3/servidor
+TRABALHO4_DIR = os.path.abspath(os.path.join(BASE_DIR, "../Trabalho_4"))
 
-if BASE_DIR not in sys.path:
-    sys.path.insert(0, BASE_DIR)
-if TRABALHO3_DIR not in sys.path:
-    sys.path.insert(0, TRABALHO3_DIR)
 if TRABALHO4_DIR not in sys.path:
     sys.path.insert(0, TRABALHO4_DIR)
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from rotas import usuarios, carrinho, loja 
-from evento_broker import publicar_usuario_logado, publicar_carrinho_finalizado
+from rotas import loja, carrinho, usuarios
+from Trabalho_4.evento_broker import publicar_usuario_logado
 
 app = FastAPI(
-    title="Sebo Virtual API - Trabalho 4 SD",
-    description="Barramento de Eventos com Redis Pub/Sub.",
+    title="Sebo Virtual API - Trabalho 3 SD",
+    description="API REST com Pub/Sub em Redis",
     version="1.0.0"
 )
 
@@ -36,36 +30,31 @@ app.include_router(loja.router)
 app.include_router(carrinho.router)
 app.include_router(usuarios.router)
 
-
 @app.get("/health")
 def health_check():
     return {
         "status": "ok",
-        "service": "Sebo Virtual API - Eventos",
+        "service": "Sebo Virtual API",
         "version": "1.0.0"
     }
-
-
-@app.get("/api/info")
-def api_info():
-    return {
-        "titulo": app.title,
-        "versao": app.version,
-        "docs": "/docs",
-        "endpoints_principais": [
-            "/loja",
-            "/carrinho",
-            "/usuarios",
-            "/health"
-        ]
-    }
-
 
 @app.get("/")
 def raiz():
     return {
-        "mensagem": "Servidor do Sebo Virtual (Trabalho 4) Ativo!",
-        "documentacao_interativa": "/docs",
-        "healthcheck": "/health",
-        "api_info": "/api/info"
+        "mensagem": "Servidor do Sebo Virtual Ativo!",
+        "docs": "/docs",
+        "health": "/health"
     }
+
+if __name__ == "__main__":
+    import uvicorn
+    
+    host = os.getenv("SERVER_HOST", "0.0.0.0")
+    port = int(os.getenv("SERVER_PORT", 8000))
+    
+    uvicorn.run(
+        "main:app",
+        host=host,
+        port=port,
+        reload=True
+    )

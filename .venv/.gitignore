@@ -1,6 +1,0 @@
-*.pyc
-__pycache__/
-*:Zone.Identifier
-.venv/
-venv/
-env/
