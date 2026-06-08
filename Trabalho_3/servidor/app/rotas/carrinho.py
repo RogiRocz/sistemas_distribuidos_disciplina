@@ -1,5 +1,10 @@
 from fastapi import APIRouter, HTTPException, Query, status
 from app.dependencies import carrinho_instance, loja_instance
+import sys
+import os
+
+sys.path.insert(0, os.path.abspath('../../Trabalho_4'))
+from evento_broker import publicar_carrinho_finalizado, broker
 
 router = APIRouter(prefix="/carrinho", tags=["Objeto 2: Carrinho de Compras"])
 
@@ -10,7 +15,6 @@ def ver_carrinho():
     total = 0.0
     total_itens = 0
     
-    # Varre os códigos salvos no seu dataclass e monta o retorno em JSON
     for codigo, qtd in itens.items():
         prod = loja_instance.buscar_por_codigo(codigo)
         if prod:
@@ -23,13 +27,21 @@ def ver_carrinho():
 
 @router.post("/adicionar/{codigo}", status_code=status.HTTP_201_CREATED)
 def adicionar_ao_carrinho(codigo: str, quantidade: int = Query(1, ge=1)):
-    # 1. Busca o objeto Produto real dentro do Catálogo da Loja
     prod = loja_instance.buscar_por_codigo(codigo)
     if not prod:
         raise HTTPException(status_code=404, detail="Produto inexistente no catálogo")
     
-    # 2. Passa o objeto Produto encontrado para a sua função do dataclass
     carrinho_instance.adicionar_produtos(prod, quantidade)
+    
+    carrinho_atual = ver_carrinho()
+    broker.publicar("sebo:carrinho:alterado", {
+        "tipo": "item_adicionado",
+        "codigo_produto": codigo,
+        "produto": prod.to_dict(),
+        "quantidade_adicionada": quantidade,
+        "carrinho": carrinho_atual
+    })
+    
     return {
         "mensagem": f"Adicionado {quantidade}x do item '{prod.titulo}' ao carrinho",
         "produto": prod.to_dict(),
@@ -43,11 +55,31 @@ def remover_do_carrinho(codigo: str):
         raise HTTPException(status_code=404, detail=f"Produto {codigo} não está no carrinho")
 
     carrinho_instance.remover_produto(codigo)
+    
+    carrinho_atual = ver_carrinho()
+    broker.publicar("sebo:carrinho:alterado", {
+        "tipo": "item_removido",
+        "codigo_produto": codigo,
+        "carrinho": carrinho_atual
+    })
+    
     return {"mensagem": f"Produto {codigo} removido do carrinho"}
 
 @router.post("/limpar")
 def limpar_carrinho():
+    carrinho_antes = ver_carrinho()
+    total = carrinho_antes["valor_total"]
+    quantidade = carrinho_antes["quantidade_total"]
+    
     carrinho_instance.limpar()
+    
+    if quantidade > 0:
+        publicar_carrinho_finalizado(
+            usuario="anonimo",
+            total=total,
+            itens=len(carrinho_antes["itens"])
+        )
+    
     return {"mensagem": "Carrinho esvaziado", "itens": 0}
 
 

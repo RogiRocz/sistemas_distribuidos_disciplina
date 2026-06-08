@@ -1,0 +1,11 @@
+# Ignorar arquivos Python compilados
+*.pyc
+__pycache__/
+
+# Ignorar metadados do Windows (Zone Identifier)
+*:Zone.Identifier
+
+# Ambiente virtual do Python
+.venv/
+venv/
+env/
