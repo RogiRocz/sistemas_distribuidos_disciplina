@@ -19,7 +19,7 @@ class EventoBroker:
     Permite publicar eventos e subscrever a tópicos
     """
     
-    def __init__(self, host='localhost', port=6381, db=0):
+    def __init__(self, host='localhost', port=6380, db=0):
         """Inicializa conexão com Redis"""
         try:
             self.redis_client = redis.Redis(
@@ -53,7 +53,7 @@ class EventoBroker:
         
         try:
             mensagem = json.dumps(dados, default=str)
-            self.redis_client.publish(topico, mensagem)
+            self.redis_client.publish(topico, message=mensagem)
             logger.info(f"📢 Evento publicado em '{topico}'")
             return True
         except Exception as e:
@@ -147,6 +147,17 @@ def publicar_estoque_alterado(codigo: str, quantidade_anterior: int, quantidade_
         "codigo_produto": codigo,
         "quantidade_anterior": quantidade_anterior,
         "quantidade_nova": quantidade_nova,
+        "timestamp": str(datetime.now())
+    })
+
+
+def publicar_carrinho_alterado(usuario: str, acao: str, detalhes: dict = None):
+    """Publica quando o carrinho sofre alterações (limpeza, remoção de item, etc)"""
+    broker.publicar(TOPICOS["CARRINHO_ALTERADO"], {
+        "tipo": "carrinho_alterado",
+        "usuario": usuario,
+        "acao": acao, # Ex: 'limpar' ou 'remover_item'
+        "detalhes": detalhes or {},
         "timestamp": str(datetime.now())
     })
 

@@ -11,7 +11,7 @@ TRABALHO4_PATH = os.path.abspath(os.path.join(BASE_DIR, "../Trabalho_4"))
 if TRABALHO4_PATH not in sys.path:
     sys.path.insert(0, TRABALHO4_PATH)
 
-from evento_broker import broker, TOPICOS, publicar_produto_novo
+from evento_broker import broker, TOPICOS, publicar_produto_novo, publicar_usuario_logado, publicar_usuario_deslogado
 
 router = APIRouter(prefix="/usuarios", tags=["Objeto 3: Gerenciador de Usuários"])
 
@@ -25,7 +25,7 @@ def login(schema: Login):
 @router.post("/logout/{username}")
 def logout(username: str):
     usuarios_instance.deslogar(username)
-    publicar_usuario_deslogado(username)  # ✨ MUDE ISTO (era logado, agora é deslogado)
+    publicar_usuario_deslogado(username)  
     return {"status": "Desconectado"}
 
 @router.get("/ativos")

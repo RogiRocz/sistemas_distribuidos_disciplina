@@ -10,7 +10,14 @@ TRABALHO4_PATH = os.path.abspath(os.path.join(BASE_DIR, "../../Trabalho_4"))
 if TRABALHO4_PATH not in sys.path:
     sys.path.insert(0, TRABALHO4_PATH)
 
-from evento_broker import broker, TOPICOS, publicar_produto_novo
+# CORRIGIDO: Adicionado o import da função 'publicar_carrinho_alterado'
+from evento_broker import (
+    broker, 
+    TOPICOS, 
+    publicar_produto_novo, 
+    publicar_carrinho_finalizado,
+    publicar_carrinho_alterado
+)
 
 router = APIRouter(prefix="/carrinho", tags=["Objeto 2: Carrinho de Compras"])
 
@@ -40,18 +47,23 @@ def adicionar_ao_carrinho(codigo: str, quantidade: int = Query(1, ge=1)):
     carrinho_instance.adicionar_produtos(prod, quantidade)
     
     carrinho_atual = ver_carrinho()
-    broker.publicar("sebo:carrinho:alterado", {
-        "tipo": "item_adicionado",
-        "codigo_produto": codigo,
-        "produto": prod.to_dict(),
-        "quantidade_adicionada": quantidade,
-        "carrinho": carrinho_atual
-    })
+    
+    # CORRIGIDO: Substituído pelo método centralizado do broker
+    publicar_carrinho_alterado(
+        usuario="anonimo",
+        acao="item_adicionado",
+        detalhes={
+            "codigo_produto": codigo,
+            "produto": prod.to_dict(),
+            "quantidade_adicionada": quantidade,
+            "carrinho": carrinho_atual
+        }
+    )
     
     return {
         "mensagem": f"Adicionado {quantidade}x do item '{prod.titulo}' ao carrinho",
         "produto": prod.to_dict(),
-        "quantidade": quantidade
+        "quantidade": quantity # Nota: ajustado se houver dependência, mantendo o padrão
     }
 
 @router.delete("/remover/{codigo}")
@@ -63,11 +75,16 @@ def remover_do_carrinho(codigo: str):
     carrinho_instance.remover_produto(codigo)
     
     carrinho_atual = ver_carrinho()
-    broker.publicar("sebo:carrinho:alterado", {
-        "tipo": "item_removido",
-        "codigo_produto": codigo,
-        "carrinho": carrinho_atual
-    })
+    
+    # CORRIGIDO: Substituído pelo método centralizado do broker
+    publicar_carrinho_alterado(
+        usuario="anonimo",
+        acao="item_removido",
+        detalhes={
+            "codigo_produto": codigo,
+            "carrinho": carrinho_atual
+        }
+    )
     
     return {"mensagem": f"Produto {codigo} removido do carrinho"}
 
@@ -80,6 +97,16 @@ def limpar_carrinho():
     carrinho_instance.limpar()
     
     if quantidade > 0:
+        # CORRIGIDO: Agora dispara o evento correto de alteração/limpeza do carrinho no Pub/Sub
+        publicar_carrinho_alterado(
+            usuario="anonimo",
+            acao="limpar",
+            detalhes={
+                "carrinho_anterior": carrinho_antes
+            }
+        )
+        
+        # Mantido caso seu fluxo de negócios exija tratar uma limpeza como finalização de pedido
         publicar_carrinho_finalizado(
             usuario="anonimo",
             total=total,

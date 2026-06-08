@@ -1,7 +1,7 @@
 import requests
 import json
 
-BASE_URL = "http://172.18.104.6:8000"
+BASE_URL = "http://0.0.0.0:8000"
 
 def format_json(data):
     return json.dumps(data, indent=2, ensure_ascii=False)
@@ -10,8 +10,8 @@ def testar_sistema():
     print("=== CLIENTE SEBO VIRTUAL (TRABALHO 3) ===")
 
     print("\n0. Verificando status da API...")
-    health = requests.get(f"{BASE_URL}/health").json()
-    print(format_json(health))
+    health = requests.get(f"{BASE_URL}/health")
+    print(format_json(health.json()))
 
     # --- OBJETO 1: LOJA (Catálogo) ---
     print("\n1. Consultando nome da loja...")

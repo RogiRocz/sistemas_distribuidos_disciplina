@@ -11,7 +11,7 @@ if TRABALHO4_DIR not in sys.path:
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from rotas import loja, carrinho, usuarios
-from Trabalho_4.evento_broker import publicar_usuario_logado
+from evento_broker import *
 
 app = FastAPI(
     title="Sebo Virtual API - Trabalho 3 SD",

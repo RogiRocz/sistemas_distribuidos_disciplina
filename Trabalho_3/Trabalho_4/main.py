@@ -23,7 +23,12 @@ from rotas import usuarios, carrinho, loja
 
 # O import direto agora funciona porque TRABALHO4_DIR está no sys.path
 try:
-    from evento_broker import publicar_usuario_logado, publicar_carrinho_finalizado
+    # ADICIONADO: 'publicar_carrinho_alterado' incluído no import para disponibilizar ao ecossistema
+    from evento_broker import (
+        publicar_usuario_logado, 
+        publicar_carrinho_finalizado, 
+        publicar_carrinho_alterado
+    )
     import eventos
     eventos_router = eventos.router
     pubsub_disponivel = True
@@ -72,7 +77,8 @@ def api_info():
         "/loja",
         "/carrinho",
         "/usuarios",
-        "/health"
+        "/health",
+        "/carrinho"
     ]
     
     if pubsub_disponivel:
