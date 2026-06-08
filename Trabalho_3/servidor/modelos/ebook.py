@@ -1,10 +1,6 @@
 from __future__ import annotations
-
 from dataclasses import dataclass
-
 from .produto import Produto
-
-
 @dataclass
 class Ebook(Produto):
     formato: str = "PDF"

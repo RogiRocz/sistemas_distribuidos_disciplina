@@ -3,7 +3,6 @@ from dataclasses import dataclass
 @dataclass
 class GerenciadorUsuarios:
     def __init__(self):
-        # Usuários e senhas mockados na infraestrutura
         self.credenciais = {
             "admin": "admin123",
             "aluno": "ufc2026"

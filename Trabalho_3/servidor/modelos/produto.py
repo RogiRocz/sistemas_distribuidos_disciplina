@@ -1,11 +1,7 @@
 from __future__ import annotations
-
 from abc import ABC
 from dataclasses import dataclass
-
 from .trocavel import Trocavel
-
-
 @dataclass
 class Produto(Trocavel, ABC):
     codigo: str

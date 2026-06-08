@@ -29,7 +29,6 @@
 </nav>
 
 <div class="container">
-    <!-- BARRA SUPERIOR DE LOGIN (OBJETO 3) -->
     <div class="card mb-4 shadow-sm">
         <div class="card-body bg-light">
             <div class="row align-items-center">
@@ -55,9 +54,7 @@
     </div>
 
     <div class="row">
-        <!-- COLUNA DE COMANDOS -->
         <div class="col-lg-4">
-            <!-- OBJETO 1: CATALOGO -->
             <div class="card dist-obj-card shadow-sm mb-4">
                 <div class="card-header bg-white fw-bold"><i class="bi bi-book"></i> Catálogo de Produtos</div>
                 <div class="card-body">
@@ -69,7 +66,6 @@
                 </div>
             </div>
 
-            <!-- OBJETO 2: CARRINHO -->
             <div class="card dist-obj-card shadow-sm mb-4" style="border-top-color: #ffc107;">
                 <div class="card-header bg-white fw-bold"><i class="bi bi-cart3"></i> Carrinho de Compras</div>
                 <div class="card-body">
@@ -84,12 +80,10 @@
                 </div>
             </div>
 
-            <!-- CONSOLE LOG -->
             <h6 class="text-muted"><i class="bi bi-terminal"></i> Log de Requisições</h6>
             <div id="console-log"></div>
         </div>
 
-        <!-- COLUNA DE VISUALIZAÇÃO -->
         <div class="col-lg-8">
             <h5 class="mb-3 text-primary"><i class="bi bi-display"></i> Visualização de Dados do Objeto</h5>
             <div id="main-view" class="view-panel shadow-sm border-0">
@@ -112,14 +106,12 @@
 <script>
     const API_URL = "http://localhost:8000";
 
-    // 1. CARREGAMENTO INICIAL
     window.onload = async () => {
         const info = await api('GET', '/loja/nome');
         if(info) document.getElementById('loja-nome-header').innerText = info.nome;
         atualizarAtivos();
     };
 
-    // 2. FUNÇÕES DE AUTENTICAÇÃO (OBJETO 3)
     async function login() {
         const u = document.getElementById('user').value;
         const p = document.getElementById('pass').value;
@@ -140,7 +132,6 @@
         }
     }
 
-    // 3. FUNÇÕES DE CATALOGO (OBJETO 1)
     async function listarProdutos() {
         const dados = await api('GET', '/loja/produtos');
         renderTabela("Produtos no Catálogo", dados);
@@ -152,7 +143,6 @@
         renderTabela(`Resultados para: ${t}`, dados);
     }
 
-    // 4. FUNÇÕES DE CARRINHO (OBJETO 2)
     async function addCarrinho() {
         const cod = document.getElementById('add-cod').value;
         await api('POST', `/carrinho/adicionar/${cod}?quantidade=1`);
@@ -166,7 +156,6 @@
         }
     }
 
-    // 5. RENDERIZADORES VISUAIS
     function renderTabela(titulo, lista) {
         let html = `<h6>${titulo}</h6><table class="table table-hover table-sm mt-3">
                     <thead class="table-light"><tr><th>Cód</th><th>Título</th><th>Tipo</th><th>Preço</th></tr></thead><tbody>`;
@@ -199,7 +188,6 @@
         }
     }
 
-    // 6. CORE API & LOG
     async function api(metodo, endpoint, body = null) {
         const timestamp = new Date().toLocaleTimeString();
         try {
