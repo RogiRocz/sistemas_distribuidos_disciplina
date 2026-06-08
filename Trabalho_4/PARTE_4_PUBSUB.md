@@ -93,33 +93,15 @@ sudo apt-get install redis-server
 redis-server
 ```
 
-### 3️⃣ Atualize o Servidor FastAPI
 
-Edite `servidor/app/main.py` e adicione:
-
-```python
-from app.rotas import eventos
-from app.evento_broker import publicar_usuario_logado, publicar_carrinho_finalizado
-
-# Adicione ao FastAPI:
-app.include_router(eventos.router)
-
-# Nos endpoints, adicione publicações:
-# Exemplo em /usuarios/login:
-publicar_usuario_logado(username)
-
-# Exemplo em /carrinho/limpar:
-publicar_carrinho_finalizado(usuario, total, qtd_itens)
-```
-
-### 4️⃣ Inicie o Servidor
+### 3️⃣ Inicie o Servidor
 
 ```bash
 cd servidor
 uvicorn app.main:app --reload
 ```
 
-### 5️⃣ Inicie o Cliente Pub/Sub
+### 4️⃣ Inicie o Cliente Pub/Sub
 
 **Modo Monitor (recomendado)**:
 ```bash
