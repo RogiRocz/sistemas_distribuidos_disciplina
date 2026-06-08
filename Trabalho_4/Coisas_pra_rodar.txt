@@ -1,8 +1,0 @@
-Shit to run: 
-uvicorn
-(.venv) caua@DESKTOP-TKAFSL4:~/SD/sistemas_distribuidos_disciplina/Trabalho_3/servidor$ uvicorn app.main:app --reload
-redis
-	redis-server --port 6380
-pubsub
-	(.venv) caua@DESKTOP-TKAFSL4:~/SD/sistemas_distribuidos_disciplina/Trabalho_4$ python app_pubsub.py --modo inteligente
-	
