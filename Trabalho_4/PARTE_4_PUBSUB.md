@@ -86,7 +86,7 @@ redis-server
 docker run -d -p 6379:6379 redis:latest
 ```
 
-**Opção C: WSL (Linux no Windows)**
+**Opção C: Linux ou WSL**
 ```bash
 wsl
 sudo apt-get install redis-server
