@@ -1,8 +1,3 @@
-"""
-WebSocket para distribuição de eventos em tempo real
-Permite que clientes recebam notificações de forma assíncrona
-"""
-
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 import json
 import logging
@@ -13,32 +8,25 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/ws", tags=["eventos"])
 
-# Conexões WebSocket ativas
 conexoes_ativas: Set[WebSocket] = set()
 
 
 @router.websocket("/eventos")
 async def websocket_eventos(websocket: WebSocket):
-    """
-    WebSocket para receber eventos em tempo real
-    
-    Conecta o cliente e envia eventos conforme são publicados
-    """
     await websocket.accept()
     conexoes_ativas.add(websocket)
     
-    logger.info(f"📱 Cliente conectado ao WebSocket. Total: {len(conexoes_ativas)}")
+    logger.info(f" Cliente conectado ao WebSocket. Total: {len(conexoes_ativas)}")
     
     try:
-        # Notifica que um novo cliente se conectou
+    
         await broadcast_para_todos({
             "tipo": "cliente_conectado",
             "mensagem": f"Nova conexão estabelecida. Total: {len(conexoes_ativas)}"
         })
         
-        # Mantém a conexão aberta esperando mensagens ou eventos
+    
         while True:
-            # Recebe msg do cliente (pode ser ping ou subscribe)
             dados = await websocket.receive_text()
             
             try:
@@ -46,11 +34,9 @@ async def websocket_eventos(websocket: WebSocket):
                 tipo = msg.get("tipo")
                 
                 if tipo == "ping":
-                    # Responde ping
                     await websocket.send_json({"tipo": "pong"})
                 
                 elif tipo == "subscribe":
-                    # Cliente se subscreve a tópicos específicos
                     topicos = msg.get("topicos", [])
                     await websocket.send_json({
                         "tipo": "subscrito",
@@ -64,9 +50,9 @@ async def websocket_eventos(websocket: WebSocket):
     
     except WebSocketDisconnect:
         conexoes_ativas.discard(websocket)
-        logger.info(f"📴 Cliente desconectado. Total: {len(conexoes_ativas)}")
+        logger.info(f" Cliente desconectado. Total: {len(conexoes_ativas)}")
         
-        # Notifica outros clientes
+    
         await broadcast_para_todos({
             "tipo": "cliente_desconectado",
             "mensagem": f"Um cliente desconectou. Total: {len(conexoes_ativas)}"
@@ -78,12 +64,6 @@ async def websocket_eventos(websocket: WebSocket):
 
 
 async def broadcast_para_todos(evento: dict):
-    """
-    Envia um evento para todos os clientes conectados via WebSocket
-    
-    Args:
-        evento: Dicionário com dados do evento
-    """
     if not conexoes_ativas:
         return
     
@@ -96,13 +76,11 @@ async def broadcast_para_todos(evento: dict):
             logger.warning(f"Erro ao enviar evento: {e}")
             desconectadas.add(websocket)
     
-    # Remove conexões com falha
     conexoes_ativas.difference_update(desconectadas)
 
 
 @router.get("/eventos/status")
 async def status_eventos():
-    """Retorna status do sistema de eventos"""
     return {
         "broker_redis": broker.redis_client is not None,
         "clientes_conectados": len(conexoes_ativas),

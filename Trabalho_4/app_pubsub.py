@@ -1,8 +1,3 @@
-"""
-Cliente Python com suporte a Pub/Sub
-Demonstra desacoplamento espacial e temporal do sistema de eventos
-"""
-
 from Trabalho_4.evento_broker import EventoBroker, TOPICOS
 import requests
 import json
@@ -16,7 +11,6 @@ class ClientePubSub:
         self.api_url = "http://127.0.0.1:8000"
     
     def conectar_api(self):
-        """Testa conexão com API"""
         try:
             resp = requests.get(f"{self.api_url}/health")
             if resp.status_code == 200:
@@ -27,7 +21,6 @@ class ClientePubSub:
             return False
     
     def callback_evento(self, topico: str, dados: dict):
-        """Callback chamado quando um evento é recebido"""
         print(f"\n{'='*60}")
         print(f"🔔 EVENTO RECEBIDO!")
         print(f"{'='*60}")
@@ -38,7 +31,6 @@ class ClientePubSub:
         print(f"{'='*60}\n")
     
     def executar(self):
-        """Executa o cliente em modo listener"""
         print(f"\n{'='*60}")
         print(f"  CLIENTE PUB/SUB - {self.nome}")
         print(f"{'='*60}\n")
@@ -46,23 +38,21 @@ class ClientePubSub:
         if not self.conectar_api():
             return
         
-        print("\n📢 Tópicos disponíveis:")
+        print("\n Tópicos disponíveis:")
         for chave, topico in TOPICOS.items():
             print(f"  • {chave:30s} → {topico}")
         
-        print(f"\n👂 Escutando TODOS os eventos do Sebo Virtual...")
+        print(f"\n Escutando TODOS os eventos do Sebo Virtual...")
         print(f"   (Padrão: sebo:*)\n")
         
-        # Se subscreve a todos os eventos do sebo
         self.broker.subscrever(
             topicos=["sebo:*"],
             callback=self.callback_evento,
-            run_async=False  # Bloqueia para continuar escutando
+            run_async=False  
         )
 
 
 class ClientePubSubInteligente:
-    """Cliente mais avançado que monitora eventos específicos"""
     
     def __init__(self):
         self.broker = EventoBroker()
@@ -74,28 +64,27 @@ class ClientePubSubInteligente:
         }
     
     def processar_evento(self, topico: str, dados: dict):
-        """Processa eventos de forma inteligente"""
         self.stats["total_eventos"] += 1
         tipo = dados.get("tipo", "")
         
-        # Produtos
+        
         if "produto:novo" in topico:
             self.stats["produtos_novos"] += 1
             produto = dados.get("produto", {})
-            print(f"\n📚 NOVO PRODUTO: {produto.get('titulo', 'Desconhecido')}")
+            print(f"\n NOVO PRODUTO: {produto.get('titulo', 'Desconhecido')}")
             print(f"   Código: {produto.get('codigo')}")
             print(f"   Preço: R$ {produto.get('preco')}")
         
-        # Carrinhos
+        
         elif "carrinho:finalizado" in topico:
             self.stats["carrinhos_finalizados"] += 1
             usuario = dados.get("usuario", "Desconhecido")
             total = dados.get("total", 0)
-            print(f"\n💳 COMPRA REALIZADA por {usuario}")
+            print(f"\n COMPRA REALIZADA por {usuario}")
             print(f"   Total: R$ {total:.2f}")
             print(f"   Itens: {dados.get('quantidade_itens', 0)}")
         
-        # Usuários
+        
         elif "usuario:logado" in topico:
             usuario = dados.get("usuario")
             self.stats["usuarios_ativos"].add(usuario)
@@ -108,17 +97,16 @@ class ClientePubSubInteligente:
             print(f"\n👤 USUÁRIO DESLOGADO: {usuario}")
             print(f"   Usuários online: {len(self.stats['usuarios_ativos'])}")
         
-        # Estoque
+        
         elif "estoque:alterado" in topico:
-            print(f"\n📦 ESTOQUE ALTERADO: {dados.get('codigo_produto')}")
+            print(f"\n ESTOQUE ALTERADO: {dados.get('codigo_produto')}")
             print(f"   Antes: {dados.get('quantidade_anterior')}")
             print(f"   Agora: {dados.get('quantidade_nova')}")
         
         else:
-            print(f"\n📌 EVENTO: {tipo}")
+            print(f"\n EVENTO: {tipo}")
     
     def exibir_stats(self):
-        """Exibe estatísticas do monitoramento"""
         print(f"\n{'='*60}")
         print(f"  ESTATÍSTICAS DE MONITORAMENTO")
         print(f"{'='*60}")
@@ -131,7 +119,6 @@ class ClientePubSubInteligente:
         print(f"{'='*60}\n")
     
     def executar(self):
-        """Executa o cliente inteligente"""
         print(f"\n{'='*60}")
         print(f"  CLIENTE PUB/SUB INTELIGENTE - MONITOR")
         print(f"{'='*60}\n")
@@ -146,13 +133,8 @@ class ClientePubSubInteligente:
                 run_async=False
             )
         except KeyboardInterrupt:
-            print("\n\n⏹️  Monitoramento interrompido.")
+            print("\n\n  Monitoramento interrompido.")
             self.exibir_stats()
-
-
-# ═══════════════════════════════════════════════════════════════
-# DEMONSTRAÇÃO
-# ═══════════════════════════════════════════════════════════════
 
 if __name__ == "__main__":
     import argparse
