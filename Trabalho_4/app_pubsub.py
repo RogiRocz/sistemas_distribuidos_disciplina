@@ -14,15 +14,15 @@ class ClientePubSub:
         try:
             resp = requests.get(f"{self.api_url}/health")
             if resp.status_code == 200:
-                print(f"✓ Conectado à API em {self.api_url}")
+                print(f" Conectado à API em {self.api_url}")
                 return True
         except:
-            print(f"✗ Erro ao conectar à API")
+            print(f" Erro ao conectar à API")
             return False
     
     def callback_evento(self, topico: str, dados: dict):
         print(f"\n{'='*60}")
-        print(f"🔔 EVENTO RECEBIDO!")
+        print(f" EVENTO RECEBIDO!")
         print(f"{'='*60}")
         print(f"Tópico: {topico}")
         print(f"Tipo:   {dados.get('tipo', 'desconhecido')}")
@@ -88,13 +88,13 @@ class ClientePubSubInteligente:
         elif "usuario:logado" in topico:
             usuario = dados.get("usuario")
             self.stats["usuarios_ativos"].add(usuario)
-            print(f"\n👤 USUÁRIO LOGADO: {usuario}")
+            print(f"\n USUÁRIO LOGADO: {usuario}")
             print(f"   Usuários online: {len(self.stats['usuarios_ativos'])}")
         
         elif "usuario:deslogado" in topico:
             usuario = dados.get("usuario")
             self.stats["usuarios_ativos"].discard(usuario)
-            print(f"\n👤 USUÁRIO DESLOGADO: {usuario}")
+            print(f"\n USUÁRIO DESLOGADO: {usuario}")
             print(f"   Usuários online: {len(self.stats['usuarios_ativos'])}")
         
         
@@ -123,8 +123,8 @@ class ClientePubSubInteligente:
         print(f"  CLIENTE PUB/SUB INTELIGENTE - MONITOR")
         print(f"{'='*60}\n")
         
-        print("📊 Monitorando eventos em tempo real...")
-        print("   (Digite Ctrl+C para sair e ver estatísticas)\n")
+        print(" Monitorando eventos em tempo real...")
+        print("(Digite Ctrl+C para sair e ver estatísticas)\n")
         
         try:
             self.broker.subscrever(
