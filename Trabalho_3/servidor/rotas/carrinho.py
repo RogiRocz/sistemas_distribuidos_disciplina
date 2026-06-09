@@ -2,15 +2,6 @@ import os
 import sys
 from fastapi import APIRouter, HTTPException, Query, status
 from dependencies import carrinho_instance, loja_instance
-
-# Partindo de Trabalho_3/servidor/rotas/ para Trabalho_3/Trabalho_4/
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-TRABALHO4_PATH = os.path.abspath(os.path.join(BASE_DIR, "../../Trabalho_4"))
-
-if TRABALHO4_PATH not in sys.path:
-    sys.path.insert(0, TRABALHO4_PATH)
-
-# CORRIGIDO: Adicionado o import da função 'publicar_carrinho_alterado'
 from evento_broker import (
     broker, 
     TOPICOS, 

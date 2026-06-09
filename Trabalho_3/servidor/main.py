@@ -1,16 +1,22 @@
 import os
 import sys
 import uvicorn
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from rotas import loja, carrinho, usuarios
-from evento_broker import *
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__)) 
-TRABALHO4_DIR = os.path.abspath(os.path.join(BASE_DIR, "../Trabalho_4"))
+TRABALHO4_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "..", "Trabalho_4"))
+
+if BASE_DIR not in sys.path:
+    sys.path.insert(0, BASE_DIR)
 
 if TRABALHO4_DIR not in sys.path:
     sys.path.insert(0, TRABALHO4_DIR)
+    
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from rotas import loja, carrinho, usuarios
+from evento_broker import *
 
 app = FastAPI(
     title="Sebo Virtual API - Trabalho 3 SD",
