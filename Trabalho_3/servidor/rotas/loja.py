@@ -43,7 +43,6 @@ def adicionar_livro(schema: LivroCreate):
     livro = Livro(**schema.model_dump())
     loja_instance.adicionar_produto(livro)
     
-    # Publica evento de novo produto
     publicar_produto_novo(livro.to_dict())
     
     return {"status": "sucesso", "produto": livro.to_dict()}
@@ -53,7 +52,6 @@ def adicionar_cd(schema: CDCreate):
     cd = CD(**schema.model_dump())
     loja_instance.adicionar_produto(cd)
     
-    # Publica evento de novo produto
     publicar_produto_novo(cd.to_dict())
     
     return {"status": "sucesso", "produto": cd.to_dict()}
@@ -63,7 +61,6 @@ def adicionar_ebook(schema: EbookCreate):
     ebook = Ebook(**schema.model_dump())
     loja_instance.adicionar_produto(ebook)
     
-    # Publica evento de novo produto
     publicar_produto_novo(ebook.to_dict())
     
     return {"status": "sucesso", "produto": ebook.to_dict()}
@@ -73,7 +70,6 @@ def adicionar_apostila(schema: ApostilaCreate):
     apostila = Apostila(**schema.model_dump())
     loja_instance.adicionar_produto(apostila)
     
-    # Publica evento de novo produto
     publicar_produto_novo(apostila.to_dict())
     
     return {"status": "sucesso", "produto": apostila.to_dict()}
@@ -84,7 +80,6 @@ def atualizar_preco(codigo: str, schema: AtualizarPreco):
     if not produto:
         raise HTTPException(status_code=404, detail=f"Produto {codigo} não encontrado")
     
-    # Publica evento de atualização de preço
     preco_anterior = produto.preco
     produto.preco = schema.novo_preco
     
@@ -104,7 +99,6 @@ def remover_produto(codigo: str):
     if not produto:
         raise HTTPException(status_code=404, detail=f"Produto {codigo} não encontrado")
     
-    # Publica evento de produto deletado
     broker.publicar("sebo:produto:deletado", {
         "tipo": "produto_deletado",
         "codigo": codigo,

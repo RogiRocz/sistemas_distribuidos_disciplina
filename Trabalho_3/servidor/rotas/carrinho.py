@@ -39,7 +39,7 @@ def adicionar_ao_carrinho(codigo: str, quantidade: int = Query(1, ge=1)):
     
     carrinho_atual = ver_carrinho()
     
-    # CORRIGIDO: Substituído pelo método centralizado do broker
+    
     publicar_carrinho_alterado(
         usuario="anonimo",
         acao="item_adicionado",
@@ -54,7 +54,7 @@ def adicionar_ao_carrinho(codigo: str, quantidade: int = Query(1, ge=1)):
     return {
         "mensagem": f"Adicionado {quantidade}x do item '{prod.titulo}' ao carrinho",
         "produto": prod.to_dict(),
-        "quantidade": quantity # Nota: ajustado se houver dependência, mantendo o padrão
+        "quantidade": quantidade 
     }
 
 @router.delete("/remover/{codigo}")
@@ -63,11 +63,9 @@ def remover_do_carrinho(codigo: str):
     if codigo not in itens_atuais:
         raise HTTPException(status_code=404, detail=f"Produto {codigo} não está no carrinho")
 
-    carrinho_instance.remover_produto(codigo)
+    carrinho_instance.remover_produto(codigo)  
+    carrinho_atual = ver_carrinho()   
     
-    carrinho_atual = ver_carrinho()
-    
-    # CORRIGIDO: Substituído pelo método centralizado do broker
     publicar_carrinho_alterado(
         usuario="anonimo",
         acao="item_removido",
@@ -87,8 +85,7 @@ def limpar_carrinho():
     
     carrinho_instance.limpar()
     
-    if quantidade > 0:
-        # CORRIGIDO: Agora dispara o evento correto de alteração/limpeza do carrinho no Pub/Sub
+    if quantidade > 0:     
         publicar_carrinho_alterado(
             usuario="anonimo",
             acao="limpar",
@@ -97,7 +94,6 @@ def limpar_carrinho():
             }
         )
         
-        # Mantido caso seu fluxo de negócios exija tratar uma limpeza como finalização de pedido
         publicar_carrinho_finalizado(
             usuario="anonimo",
             total=total,

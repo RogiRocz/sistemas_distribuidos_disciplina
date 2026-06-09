@@ -1,28 +1,27 @@
 import os
 import sys
+import uvicorn
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__)) 
-
-TRABALHO4_DIR = os.path.abspath(os.path.join(BASE_DIR, "../Trabalho_4"))
+TRABALHO3_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "Trabalho_3", "servidor"))
 
 if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
-if TRABALHO4_DIR not in sys.path:
-    sys.path.insert(0, TRABALHO4_DIR)
+
+if TRABALHO3_DIR not in sys.path:
+    sys.path.insert(0, TRABALHO3_DIR)
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
 from rotas import usuarios, carrinho, loja
 
 try:
-
-    from Trabalho_4.evento_broker import (
+    from evento_broker import (
         publicar_usuario_logado, 
         publicar_carrinho_finalizado, 
         publicar_carrinho_alterado
     )
-    import Trabalho_4.eventos as eventos
+    import eventos as eventos
     eventos_router = eventos.router
     pubsub_disponivel = True
 except ImportError as e:
@@ -48,7 +47,7 @@ app.include_router(usuarios.router)
 
 if pubsub_disponivel:
     app.include_router(eventos_router)
-    print("✓ Pub/Sub (Trabalho 4) integrado com sucesso")
+    print(" Pub/Sub (Trabalho 4) integrado com sucesso")
 
 
 @app.get("/health")
@@ -88,7 +87,7 @@ def api_info():
 
 @app.get("/")
 def raiz():
-    status_pubsub = "✓ Ativo" if pubsub_disponivel else "✗ Inativo"
+    status_pubsub = " Ativo" if pubsub_disponivel else "✗ Inativo"
     
     return {
         "mensagem": "Servidor do Sebo Virtual Ativo!",
@@ -98,9 +97,7 @@ def raiz():
         "pubsub_status": status_pubsub
     }
 
-if __name__ == "__main__":
-    import uvicorn
-    
+if __name__ == "__main__":    
     host = os.getenv("SERVER_HOST", "0.0.0.0")
     port = int(os.getenv("SERVER_PORT", 8000))
     
